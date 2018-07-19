@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.charl.easynotes.R;
-import com.example.charl.easynotes.model.NoteEntity;
+import com.example.charl.easynotes.database.NoteEntity;
 
 import java.util.List;
 

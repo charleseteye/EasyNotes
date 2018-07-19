@@ -1,6 +1,6 @@
 package com.example.charl.easynotes.utilities;
 
-import com.example.charl.easynotes.model.NoteEntity;
+import com.example.charl.easynotes.database.NoteEntity;
 
 import java.util.ArrayList;
 import java.util.Calendar;
