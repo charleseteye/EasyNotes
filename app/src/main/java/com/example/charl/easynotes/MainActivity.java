@@ -1,7 +1,10 @@
 package com.example.charl.easynotes;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,7 +15,7 @@ import android.view.MenuItem;
 
 import com.example.charl.easynotes.database.NoteEntity;
 import com.example.charl.easynotes.ui.NotesAdapter;
-import com.example.charl.easynotes.utilities.SampleData;
+import com.example.charl.easynotes.viewmodel.MainViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
     private NotesAdapter mAdapter;
+    private MainViewModel mViewModel;
 
     private List<NoteEntity> notesData=new ArrayList<>();
 
@@ -45,14 +49,33 @@ public class MainActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
         initRecyclerview();
+        initViewModel();
 
 
-        notesData.addAll(SampleData.getNotes());
-        for (NoteEntity note:
-             notesData) {
-            Log.i("PlainoldNotes", note.toString());
-            
-        }
+
+
+    }
+
+    private void initViewModel() {
+        final Observer<List<NoteEntity>> noteObserver =
+                new Observer<List<NoteEntity>>() {
+                    @Override
+                    public void onChanged(@Nullable List<NoteEntity> noteEntities) {
+                        notesData.clear();
+                        notesData.addAll(noteEntities);
+
+                        if (mAdapter == null) {
+                            mAdapter=new NotesAdapter(notesData,MainActivity.this);
+                            mRecyclerView.setAdapter(mAdapter);
+                        }else {
+                            mAdapter.notifyDataSetChanged();
+                        }
+
+                    }
+                };
+        mViewModel= ViewModelProviders.of(this)
+                .get(MainViewModel.class);
+        mViewModel.mNotes.observe(this,noteObserver);
     }
 
     private void initRecyclerview() {
@@ -60,8 +83,7 @@ public class MainActivity extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-        mAdapter=new NotesAdapter(notesData,this);
-        mRecyclerView.setAdapter(mAdapter);
+
     }
 
     @Override
@@ -79,10 +101,25 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_add_sample_data) {
+
+            addSampleData();
             return true;
+        }else if(id == R.id.action_delete){
+
+            deleteAllNotes();
+            return true;
+
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void deleteAllNotes() {
+        mViewModel.deleteAllNotes();
+    }
+
+    private void addSampleData() {
+        mViewModel.addSampleData();
     }
 }
